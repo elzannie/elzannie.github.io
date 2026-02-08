@@ -2,11 +2,18 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+
+<!-- FIXED VIEWPORT -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>Escape Your Phone</title>
 
 <style>
+/* RESET */
+*{
+    box-sizing:border-box;
+}
+
 body{
     margin:0;
     padding:0;
@@ -22,14 +29,15 @@ body{
 
 /* ROTATE OVERLAY */
 #overlay{
-    background:rgba(0,0,0,0.6);
+    position:fixed;
+    top:-100vh;
+    left:0;
     width:100vw;
     height:100vh;
+    background:rgba(0,0,0,0.7);
     display:flex;
     justify-content:center;
     align-items:center;
-    position:absolute;
-    top:-100vh;
     z-index:10;
 }
 
@@ -38,39 +46,23 @@ body{
     color:white;
 }
 
-/* IFRAME CONTAINER */
-#container{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-/* IFRAME */
-iframe{
-    width:960px;
-    height:540px;
-    aspect-ratio:16/9;
-    border:none;
-    background:black;
-    overflow:hidden;
+#overlay svg{
+    margin-bottom:20px;
 }
 
 /* SHOW ROTATE WARNING ON PORTRAIT */
-@media only screen 
-and (min-device-width:375px) 
-and (orientation:portrait){
+@media (orientation: portrait){
     #overlay{
         top:0;
     }
 }
 
-/* SCALE DOWN ON SMALL LANDSCAPE */
-@media only screen 
-and (max-width:767px) 
-and (orientation:landscape){
-    #container{
-        transform:scale(0.6);
-    }
+/* IFRAME */
+iframe{
+    width:100vw;
+    height:100vh;
+    border:none;
+    background:black;
 }
 </style>
 </head>
@@ -90,10 +82,8 @@ and (orientation:landscape){
     </div>
 </div>
 
-<!-- GAME LOADER -->
-<div id="container">
-    <iframe src="page1.html"></iframe>
-</div>
+<!-- GAME IFRAME -->
+<iframe src="page1.html"></iframe>
 
 </body>
 </html>
