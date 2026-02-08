@@ -1,28 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Escape Your Phone</title>
 
 <style>
-
+*{
+    box-sizing:border-box;
+}
 
 body{
-  margin:0;
-  height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:black;
-  cursor:pointer;
+    margin:0;
+    padding:0;
+    width:100vw;
+    height:100vh;
+    background:black;
+    overflow:hidden;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
-img{max-height:90%;}
+
+/* ROTATE OVERLAY */
+#overlay{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    background:rgba(0,0,0,0.85);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    color:white;
+    z-index:9999;
+}
+
+/* GAME IFRAME */
+iframe{
+    width:100vw;
+    height:100vh;
+    border:none;
+    display:block;
+}
 </style>
 </head>
-<body onclick="next()">
-<img src="cat.gif">
+
+<body>
+
+<!-- ROTATE SCREEN OVERLAY -->
+<div id="overlay">
+    <div>
+        <svg fill="#ffffff" width="140" height="140" viewBox="0 0 214.367 214.367">
+            <path d="M202.403,95.22c0,46.312-33.237,85.002-77.109,93.484v25.663l-69.76-40l69.76-40v23.494
+            c27.176-7.87,47.109-32.964,47.109-62.642c0-35.962-29.258-65.22-65.22-65.22s-65.22,29.258-65.22,65.22
+            c0,9.686,2.068,19.001,6.148,27.688l-27.154,12.754c-5.968-12.707-8.994-26.313-8.994-40.441C11.964,42.716,54.68,0,107.184,0
+            S202.403,42.716,202.403,95.22z"/>
+        </svg>
+        <h1>Please rotate your phone</h1>
+    </div>
+</div>
+
+<!-- GAME -->
+<iframe id="game" src="page1.html"></iframe>
+
 <script>
-function next(){ location.href="page2.html"; }
+function checkOrientation(){
+    const overlay = document.getElementById("overlay");
+    const game = document.getElementById("game");
+
+    if (window.innerHeight > window.innerWidth) {
+        // Portrait
+        overlay.style.display = "flex";
+        game.style.display = "none";
+    } else {
+        // Landscape
+        overlay.style.display = "none";
+        game.style.display = "block";
+    }
+}
+
+window.addEventListener("load", checkOrientation);
+window.addEventListener("resize", checkOrientation);
+window.addEventListener("orientationchange", checkOrientation);
 </script>
+
 </body>
 </html>
 
