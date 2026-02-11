@@ -7,42 +7,81 @@
 <title>Escape Your Phone</title>
 
 <style>
-*{
-    box-sizing:border-box;
+* {
+    box-sizing: border-box;
 }
 
-body{
-    margin:0;
-    padding:0;
-    width:100vw;
-    height:100vh;
-    background:black;
-    overflow:hidden;
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
+    overflow: hidden;
 }
 
-/* ROTATE OVERLAY */
-#overlay{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100vw;
-    height:100vh;
-    background:rgba(0,0,0,0.85);
-    display:none;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    color:white;
-    z-index:9999;
+/* ROTATE SCREEN OVERLAY */
+#overlay {
+    background: rgba(0, 0, 0, 0.85);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: -100vh; /* hide initially */
+    text-align: center;
+    color: white;
+    z-index: 9999;
 }
 
-/* GAME IFRAME */
-iframe{
-    width:100vw;
-    height:100vh;
-    border:none;
-    display:block;
+#overlay div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#overlay svg {
+    margin-bottom: 20px;
+}
+
+/* GAME CONTAINER */
+#container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+iframe {
+    width: 960px;
+    height: 540px;
+    aspect-ratio: 16/9;
+    border: none;
+    background-color: #111;
+}
+
+/* Responsive adjustments */
+@media only screen and (min-device-width: 375px) and (orientation: portrait) {
+    #overlay {
+        top: 0;
+    }
+}
+
+@media only screen and (max-width: 767px) and (orientation: landscape) {
+    #container {
+        transform: scale(0.6);
+    }
+
+    iframe {
+        width: 100%;
+        height: auto;
+    }
 }
 </style>
 </head>
@@ -63,21 +102,23 @@ iframe{
 </div>
 
 <!-- GAME -->
-<iframe id="game" src="page1.html"></iframe>
+<div id="container">
+    <iframe id="game" src="page1.html"></iframe>
+</div>
 
 <script>
-function checkOrientation(){
+function checkOrientation() {
     const overlay = document.getElementById("overlay");
-    const game = document.getElementById("game");
+    const container = document.getElementById("container");
 
     if (window.innerHeight > window.innerWidth) {
-        // Portrait
-        overlay.style.display = "flex";
-        game.style.display = "none";
+        // Portrait: show overlay
+        overlay.style.top = "0";
+        container.style.display = "none";
     } else {
-        // Landscape
-        overlay.style.display = "none";
-        game.style.display = "block";
+        // Landscape: hide overlay
+        overlay.style.top = "-100vh";
+        container.style.display = "flex";
     }
 }
 
