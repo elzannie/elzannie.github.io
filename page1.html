@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LOCK IN</title>
+
+<style>
+/* RESET */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+  /* FULLSCREEN BLACK OVERLAY */
+  #fadeOverlay {
+    position: fixed;
+    inset: 0;
+    background: black;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: opacity 1s ease;
+  }
+
+/* BODY */
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Arial Black', Impact, sans-serif;
+}
+
+/* BACKGROUND + LOGO */
+#intro {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: url("images/introbackground.jpg") no-repeat center center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* FULLSCREEN LOGO */
+#logo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: pulse 2.5s infinite ease-in-out;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* PULSE ANIMATION */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* START BUTTON */
+#startBtn {
+  position: absolute;
+  bottom: 60px;
+  z-index: 2;
+  padding: 16px 48px;
+  font-size: 26px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+
+  background: linear-gradient(145deg, #22c55e, #16a34a);
+  color: #020617;
+
+  box-shadow:
+    0 6px 0 #15803d,
+    0 12px 20px rgba(0,0,0,0.5);
+
+  transition: all 0.2s ease;
+}
+
+/* HOVER EFFECT */
+#startBtn:hover {
+  background: linear-gradient(145deg, #38bdf8, #0ea5e9);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 0 #0369a1,
+    0 16px 26px rgba(0,0,0,0.6);
+}
+
+/* CLICK EFFECT */
+#startBtn:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 3px 0 #0369a1,
+    0 6px 10px rgba(0,0,0,0.5);
+}
+</style>
+</head>
+
+<body>
+
+<div id="intro">
+  <img id="logo" src="images/intro.jpg" alt="Game Logo">
+  <button id="startBtn" onclick="startGame()">START</button>
+</div>
+
+<!-- FULLSCREEN BLACK OVERLAY -->
+<div id="fadeOverlay"></div>
+
+<script>
+  // Function to try and play BGM
+function startMusic() {
+  const bgm = new Audio('sfx/bedroom.mp3');
+  bgm.loop = true;
+  
+  // Try to play immediately
+  let playPromise = bgm.play();
+
+  if (playPromise !== undefined) {
+    playPromise.catch(error => {
+      // If the browser blocked it, wait for the first click anywhere
+      console.log("Autoplay blocked. Waiting for user interaction...");
+      document.addEventListener('click', () => {
+        bgm.play();
+      }, { once: true });
+    });
+  }
+}
+
+window.onload = startMusic;
+// --- AUDIO OBJECTS ---
+const introBGM = new Audio('sfx/intro.mp3');
+introBGM.loop = true;
+const clickSFX = new Audio('sfx/click.mp3');
+
+// 1. UNLOCK AUDIO: This plays the music as soon as they click 
+// anywhere on the screen (or the button) for the first time.
+document.addEventListener('click', () => {
+  introBGM.play().catch(e => console.log("BGM pending interaction..."));
+}, { once: true });
+
+// 2. START GAME FUNCTION: Handles the transition
+function startGame() {
+  // Play click sound immediately
+  clickSFX.play();
+
+  const fadeOverlay = document.getElementById("fadeOverlay");
+  
+  // Make overlay visible and fade in
+  fadeOverlay.style.pointerEvents = "auto";
+  fadeOverlay.style.opacity = "1";
+
+  // Wait for 1 second transition, then change page
+  setTimeout(() => {
+    window.location.href = "page2.html";
+  }, 1000);
+}
+</script>
+
+</body>
+
+</html>

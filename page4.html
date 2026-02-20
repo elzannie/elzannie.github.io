@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Escape the Phone</title>
+<style>
+  /* ALL YOUR ORIGINAL STYLES STAY EXACTLY THE SAME */
+  body {
+    margin: 0; font-family: Arial, sans-serif;
+    display: flex; justify-content: center; align-items: center;
+    height: 100vh; background: url('images/background.jpg') no-repeat center center;
+    background-size: cover;
+  }
+
+  #game {
+    width: 750px; max-width: 95%; background: rgb(1, 39, 65);
+    border-radius: 25px; padding: 40px; position: relative;
+    color: white; box-shadow: 0 0 50px rgba(0,0,0,0.4);
+    transition: transform 1s ease, opacity 1s ease;
+  }
+
+  #levelTitle { font-size: 24px; margin-bottom: 25px; text-align: center; }
+  #choices { display: flex; flex-direction: column; }
+
+  .choice {
+    width: 100%; padding: 15px; border: none; border-radius: 40px;
+    margin-bottom: 15px; font-size: 16px; cursor: pointer;
+    background: #ffffff; color: #333; transition: 0.3s;
+  }
+  .choice:hover { transform: scale(1.02); }
+  .correctSelected { background: #4CAF50 !important; color: white !important; }
+  .wrongSelected { background: #E53935 !important; color: white !important; }
+
+  #characterArea {
+    position: absolute; right: -20px; bottom: 40px;
+    display: none; align-items: flex-end; gap: 15px;
+  }
+  #characterImg { width: 200px; }
+
+  #speechBubble {
+    background: white; color: #333; padding: 18px 20px; border-radius: 25px;
+    max-width: 320px; min-height: 70px; font-size: 14px; line-height: 1.5;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15); margin-bottom: 200px;
+    margin-right: -50px; display: flex; flex-direction: column; gap: 10px;
+    position: relative; animation: popIn 0.3s ease;
+  }
+
+  #speechBubble::after {
+    content: ""; position: absolute; width: 30px; height: 30px;
+    bottom: 0px; right: 0px; background: white;
+    clip-path: polygon(100% 0, 0% 100%, 100% 100%);
+  }
+
+  #actionBtn {
+    align-self: flex-end; padding: 8px 18px; border-radius: 20px;
+    cursor: pointer; font-size: 14px; background: #2d2a4a;
+    color: white; border: none; opacity: 0; transform: translateY(10px);
+    transition: 0.3s ease;
+  }
+  #actionBtn.show { opacity: 1; transform: translateY(0); }
+  #actionBtn:hover {
+    background: #ffffff; color: #2d2a4a; border: 2px solid #2d2a4a;
+    transform: scale(1.1) translateY(0); border-radius: 1cm;
+  }
+
+  @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+</style>
+</head>
+
+<body>
+
+<div id="game">
+  <h1 id="levelTitle"></h1>
+  <div id="choices"></div>
+
+  <div id="characterArea">
+    <div id="speechBubble">
+      <div id="bubbleText"></div>
+      <button id="actionBtn"></button>
+    </div>
+    <img id="characterImg" src="" alt="Character"/>
+  </div>
+</div>
+
+<script>
+// 1. --- AUDIO CONFIGURATION ---
+const sfx = {
+  bgm: new Audio('sfx/game.mp3'),
+  click: new Audio('sfx/click.mp3'),
+  correct: new Audio('sfx/correct.mp3'),
+  wrong: new Audio('sfx/wrong.mp3'),
+  talk: new Audio('sfx/talking.mp3')
+};
+sfx.bgm.loop = true;
+
+// Utility to unlock audio for modern browsers
+function unlockAudio() {
+  sfx.bgm.play().catch(() => {});
+  document.removeEventListener('click', unlockAudio);
+}
+document.addEventListener('click', unlockAudio);
+
+// --- RESTORED ORIGINAL LEVELS DATA ---
+const levels = [
+  {
+    questions:[
+      {
+        text:"Q1: A person online asks you for your address. What should you do?",
+        answers:[
+          { text:"Reply immediately", correct:false, explanation:"Sharing your home address with someone you don’t know can put you in serious danger. Always keep personal details private and tell a trusted adult if someone asks." },
+          { text:"Refuse and keep it private", correct:true, explanation:"Great thinking! You should not give your address out to people you don't know. Staying safe means keeping private details private." },
+        ]
+      },
+      {
+        text:"Q2: A new number you have never seen texts and asks you what school you attend.",
+        answers:[
+          { text:"Keep it private", correct:true, explanation:"Correct! Personal information should stay private." },
+          { text:"Tell them", correct:false, explanation:"Sharing your school reveals your location and personal information." },
+        ]
+      }
+    ]
+  },
+  {
+    questions:[
+      {
+        text:"Q3: Someone asks for a private photo.",
+        answers:[
+          { text:"Send it", correct:false, explanation:"Once shared, images can be saved, copied, and redistributed." },
+          { text:"Refuse", correct:true, explanation:"Exactly right. Private images should stay private." },
+          { text:"Send only part of the image", correct:false, explanation:"Even partial images can reveal private information." },
+        ]
+      },
+      {
+        text:"Q4: They ask you for a private picture and promise to delete it later.",
+        answers:[
+          { text:"Trust them and send it", correct:false, explanation:"You cannot control what happens after sending an image." },
+          { text:"Do not send it at all", correct:true, explanation:"Smart choice! Prevention is always safest." },
+          { text:"Screenshot the promise and send it", correct:false, explanation:"This still shares private content and isn’t safe." },
+        ]
+      }
+    ]
+  },
+  {
+    questions:[
+      {
+       text:"Q5: They send you an inappropriate text and ask you to keep the conversation secret.",
+       answers:[
+        {text:"Agree and keep it a secret", correct:false, explanation:"Being asked to keep secrets about inappropriate messages is a serious warning sign. It often indicates manipulation or grooming behaviour." },
+        {text:"Tell a trusted adult", correct:true, explanation:"Correct. Informing a trusted adult such as a parent, teacher, or guardian helps ensure your safety and allows proper action to be taken." },
+        {text:"Delete it without telling anyone", correct:false, explanation:"Deleting the message does not solve the problem and may remove important evidence. It is safer to report it to someone responsible." },
+        {text:"Pretend to comply but tell later", correct:false, explanation:"Delaying disclosure can allow the situation to escalate. Reporting immediately is the safest and most responsible response." }
+      ]
+      },
+      {
+      text:"Q6: They send inappropriate content.",
+      answers:[
+        {text:"Respond to it", correct:false, explanation:"Responding may encourage further inappropriate behaviour and signals continued engagement." },
+        {text:"Block and report", correct:true, explanation:"Correct. Blocking stops further contact, and reporting helps protect both you and other users from harm." },
+        {text:"Save it for evidence and send it to your friends", correct:false, explanation: "Sharing inappropriate content spreads harm and may violate the law. If you keep it as evidence, it should only be shown to a trusted adult or authority." },
+        {text:"Continue talking to them", correct:false, explanation:"Continuing the conversation encourages further inappropriate behaviour and increases risk. The safest response is to stop engaging, block the sender, and report the incident." }
+      ]
+      }
+    ]
+  }
+];
+
+// 3. --- STATE ---
+let currentLevelIdx = 0;
+let currentQuestionIdx = 0;
+
+// 4. --- GAME LOGIC ---
+function loadQuestion() {
+  // Reset UI
+  document.getElementById("characterArea").style.display = "none";
+  document.getElementById("actionBtn").classList.remove("show");
+  sfx.talk.pause();
+
+  const question = levels[currentLevelIdx].questions[currentQuestionIdx];
+  document.getElementById("levelTitle").innerText = question.text;
+
+  const choicesDiv = document.getElementById("choices");
+  choicesDiv.innerHTML = "";
+
+  // Create buttons
+  question.answers.forEach(answer => {
+    const btn = document.createElement("button");
+    btn.innerText = answer.text;
+    btn.className = "choice";
+    btn.onclick = () => handleChoice(btn, answer);
+    choicesDiv.appendChild(btn);
+  });
+}
+
+function handleChoice(selectedBtn, answer) {
+  // Disable all buttons to prevent double-clicking
+  document.querySelectorAll(".choice").forEach(b => b.disabled = true);
+
+  if (answer.correct) {
+    selectedBtn.classList.add("correctSelected");
+    sfx.correct.play();
+  } else {
+    selectedBtn.classList.add("wrongSelected");
+    sfx.wrong.play();
+  }
+  
+  showExplanation(answer);
+}
+
+function showExplanation(answer) {
+  const charArea = document.getElementById("characterArea");
+  const charImg = document.getElementById("characterImg");
+  const actionBtn = document.getElementById("actionBtn");
+
+  charArea.style.display = "flex";
+  charImg.src = answer.correct ? "images/characterhappy.jpg" : "images/charactersad.jpg";
+  
+  sfx.talk.currentTime = 0;
+  sfx.talk.play();
+
+  typeWriter(answer.explanation, () => {
+    sfx.talk.pause();
+    
+    // Set up Action Button
+    actionBtn.innerText = answer.correct ? "Continue ➜" : "Try Again ↺";
+    actionBtn.classList.add("show");
+    
+    actionBtn.onclick = () => {
+      sfx.click.play();
+      answer.correct ? goToNext() : loadQuestion();
+    };
+  });
+}
+
+function typeWriter(text, callback) {
+  const bubble = document.getElementById("bubbleText");
+  let i = 0;
+  bubble.textContent = "";
+
+  function typing() {
+    if (i < text.length) {
+      bubble.textContent += text.charAt(i);
+      i++;
+      setTimeout(typing, 25);
+    } else if (callback) {
+      callback();
+    }
+  }
+  typing();
+}
+
+function goToNext() {
+  currentQuestionIdx++;
+  
+  // Check if we finished the level
+  if (currentQuestionIdx >= levels[currentLevelIdx].questions.length) {
+    currentLevelIdx++;
+    currentQuestionIdx = 0;
+  }
+
+  // Check if we finished the whole game
+  if (currentLevelIdx < levels.length) {
+    loadQuestion();
+  } else {
+    showFinalScreen();
+  }
+}
+
+function showFinalScreen() {
+  const game = document.getElementById("game");
+  game.innerHTML = `
+    <div style="text-align:center; color:white;">
+      <h1>You've completed all safety levels! 🎉</h1>
+      <p>You can now escape the phone.</p>
+      <button id="escapeBtn" class="choice" style="width:auto; padding:15px 40px; background:#2d2a4a; color:white;">Escape Phone</button>
+    </div>
+  `;
+
+  document.getElementById("escapeBtn").onclick = () => {
+    game.style.transform = "scale(0.2) rotate(10deg)";
+    game.style.opacity = "0";
+    setTimeout(() => { window.location.href = "page5.html"; }, 1000);
+  };
+}
+
+// 5. --- START ---
+window.onload = loadQuestion;
+</script>
+</body>
+</html>

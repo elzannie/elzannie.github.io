@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Page 2 – The Friendly Stranger</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  /* BODY */
+  body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url('images/bedroom.jpg') no-repeat center center;
+    background-size: cover;
+    overflow: hidden;
+  }
+  
+
+  /* GAME CONTAINER */
+  #game-container {
+    width: 960px;
+    height: 540px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+
+  /* PHONE */
+  #phone {
+    width: 300px;
+    height: 540px;
+    background: linear-gradient(#111827, #020617);
+    border-radius: 30px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 1s ease;
+  }
+
+  /* PHONE CONTENT */
+  #phone-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+    justify-content: flex-start;
+  }
+
+  /* POPUP */
+  #popup {
+    flex-shrink: 0;
+    max-height: 180px;
+    overflow-y: auto;
+    margin: 0 0 20px 0;
+    padding: 15px 12px;
+    background: #333;
+    border-radius: 15px;
+    text-align: center;
+    color: white;
+    animation: popupPop 0.6s ease-out forwards;
+    word-wrap: break-word;
+  }
+
+  #popup strong {
+    font-weight: 700;
+  }
+
+  #popup p:first-child {
+    margin-bottom: 8px;
+  }
+
+  /* POPUP BUTTON */
+  #popup button {
+    margin-top: 12px;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 12px;
+    background: #555;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.25s ease;
+  }
+
+  #popup button:hover {
+    background: #777;
+    transform: scale(1.05);
+  }
+
+  /* CHAT */
+  #chat {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    background: #f5f5f7;
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  /* MESSAGES */
+  .messages {
+    flex: 1;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+  }
+
+  /* CHAT BUBBLES */
+  .bubble {
+    max-width: 85%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  /* JAY MESSAGE */
+  .bubble.jay {
+    background: #e5e5ea;
+    color: black;
+    align-self: flex-start;
+    border-top-left-radius: 6px;
+    ;
+  }
+  .animate-notify {
+  animation: notifyPop 0.6s ease-out forwards;
+}
+
+
+  /* USER MESSAGE */
+  .bubble.user {
+    background: #1e3a8a;
+    color: white;
+    align-self: flex-end;
+    border-top-right-radius: 6px;
+  }
+
+  .bubble.user.danger {
+  background: #ff0000;
+  box-shadow: 0 0 25px rgba(255, 0, 0, 1);
+  transform: scale(1.05);
+  transition: all 0.4s ease;
+}
+
+
+
+  /* REPLY OPTION */
+  .reply-option {
+    margin: 8px 12px;
+    padding: 12px 18px;
+    background: #e5e7eb;
+    border-radius: 22px;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+  }
+
+  .reply-option:hover {
+    background: #1e3a8a;
+    color: white;
+    transform: scale(1.05);
+  }
+
+  /* INPUT BAR */
+  .input-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    background: white;
+    border-top: 1px solid #d1d5db;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+  }
+
+  .fake-input {
+    flex: 1;
+    padding: 10px 14px;
+    background: #f1f1f1;
+    border-radius: 18px;
+    color: #8e8e93;
+    font-size: 14px;
+    user-select: none;
+  }
+
+  #sendBtn {
+    padding: 8px 14px;
+    border-radius: 14px;
+    border: none;
+    background: #007aff;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.4;
+    transition: all 0.25s ease;
+  }
+
+  #sendBtn:enabled {
+    opacity: 1;
+  }
+
+  #sendBtn:hover:enabled {
+    background: #005ecb;
+    transform: scale(1.05);
+  }
+
+  /* RED SCREEN */
+  #red-screen {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 26px;
+    color: white;
+    background: #ff7f7f;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    padding: 50px;
+    animation: redPulse 1.5s infinite alternate;
+    box-shadow: 0 0 20px rgba(255,0,0,0.5);
+    transition: background 0.5s ease, box-shadow 0.5s ease;
+  }
+
+  /* ANIMATIONS */
+  @keyframes popupPop {
+    0% { transform: translateY(20px) scale(0.95); opacity: 0; }
+    60% { transform: translateY(-4px) scale(1.02); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  @keyframes notifyPop {
+    0% { transform: translateY(-30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes redPulse {
+    0% {
+      transform: scale(1);
+      box-shadow: 0 0 15px rgba(255,0,0,0.5);
+      background: #ff7f7f;
+    }
+    50% {
+      transform: scale(1.03);
+      box-shadow: 0 0 35px rgba(255,0,0,0.9);
+      background: #ff0000;
+    }
+    100% {
+      transform: scale(1);
+      box-shadow: 0 0 15px rgba(255,0,0,0.5);
+      background: #ff0000;
+    }
+
+    
+  }
+  
+  @keyframes phoneShake {
+  0%   { transform: translate(-50%, -50%) translateX(0); }
+  20%  { transform: translate(-50%, -50%) translateX(-10px); }
+  40%  { transform: translate(-50%, -50%) translateX(10px); }
+  60%  { transform: translate(-50%, -50%) translateX(-8px); }
+  80%  { transform: translate(-50%, -50%) translateX(8px); }
+  100% { transform: translate(-50%, -50%) translateX(0); }
+}
+
+</style>
+</head>
+<body>
+
+<div id="game-container">
+
+  <!-- RED SCREEN -->
+  <div id="red-screen">
+    You have selected the wrong answer.<br />
+    You are now stuck in your phone.
+  </div>
+
+  <!-- PHONE -->
+  <div id="phone">
+    <div id="phone-content">
+
+      <!-- START POPUP -->
+      <div id="popup">
+        <p><strong>Jay_irl (not following_)</strong></p>
+        <p>Hey 🙂 You're beautiful... Send me your address so I can come over 😉</p>
+        <button id="openChat">Open message</button>
+      </div>
+
+      <!-- CHAT -->
+      <div id="chat">
+        <div class="messages">
+          <div class="bubble jay">
+            Hey 🙂 You're beautiful... Send me your address so I can come over 😉
+          </div>
+        </div>
+
+        <div class="reply-option" id="replyOption">
+          Sure! My address is 123 Sunshine Avenue #08-50 🤩
+        </div>
+
+        <div class="input-bar">
+          <div class="fake-input" id="fakeInput">iMessage</div>
+          <button id="sendBtn" disabled>Send</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Function to try and play BGM
+function startMusic() {
+  const bgm = new Audio('sfx/bedroom.mp3');
+  bgm.loop = true;
+  
+  // Try to play immediately
+  let playPromise = bgm.play();
+
+  if (playPromise !== undefined) {
+    playPromise.catch(error => {
+      // If the browser blocked it, wait for the first click anywhere
+      console.log("Autoplay blocked. Waiting for user interaction...");
+      document.addEventListener('click', () => {
+        bgm.play();
+      }, { once: true });
+    });
+  }
+}
+
+window.onload = startMusic;
+  // --- AUDIO OBJECTS ---
+  const bgm = new Audio('sfx/bedroom.mp3');
+  bgm.loop = true;
+  const notifySFX = new Audio('sfx/notification.mp3'); 
+  const clickSFX = new Audio('sfx/click.mp3');
+  const sendSFX = new Audio('sfx/send.mp3');
+  const wrongSFX = new Audio('sfx/wrong.mp3');
+  const alarmSFX = new Audio('sfx/alarm.mp3');
+
+  // TRIGGER ONLY AT THE VERY START
+  function startScene() {
+    bgm.play().catch(e => console.log("BGM wait"));
+    notifySFX.play(); // This triggers only once when scene begins
+  }
+
+  window.addEventListener('load', () => {
+    startScene();
+    // Safety Net: If blocked, trigger on first click anywhere
+    document.addEventListener('click', () => {
+      startScene();
+    }, { once: true });
+  });
+
+  const openChatBtn = document.getElementById("openChat");
+  const popup = document.getElementById("popup");
+  const chat = document.getElementById("chat");
+  const replyOption = document.getElementById("replyOption");
+  const fakeInput = document.getElementById("fakeInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const messages = document.querySelector(".messages");
+  const phone = document.getElementById("phone");
+  const redScreen = document.getElementById("red-screen");
+
+  /* OPEN CHAT */
+  openChatBtn.addEventListener("click", () => {
+    clickSFX.play(); // Only click sound here
+    popup.style.display = "none";
+    chat.style.display = "flex";
+    
+    const jayBubble = document.querySelector(".bubble.jay");
+    jayBubble.classList.add("animate-notify");
+    setTimeout(() => { jayBubble.classList.remove("animate-notify"); }, 600);
+  });
+
+  /* SELECT REPLY OPTION */
+  replyOption.addEventListener("click", () => {
+    clickSFX.play();
+    fakeInput.textContent = replyOption.textContent;
+    fakeInput.style.color = "#000";
+    sendBtn.disabled = false;
+    replyOption.style.display = "none";
+  });
+
+  /* SEND MESSAGE */
+  sendBtn.addEventListener("click", () => {
+    sendSFX.play();
+    sendBtn.disabled = true;
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble user";
+    bubble.textContent = fakeInput.textContent;
+    messages.appendChild(bubble);
+
+    // ERROR MOMENT
+    setTimeout(() => {
+      bubble.classList.add("danger");
+      bgm.pause();
+      bgm.currentTime = 0;
+      wrongSFX.play();
+      alarmSFX.play();
+    }, 500);
+
+    bubble.animate(
+      [ { transform: "translateY(20px)", opacity: 0 }, { transform: "translateY(0)", opacity: 1 } ],
+      { duration: 300, easing: "ease-out" }
+    );
+
+    fakeInput.textContent = "iMessage";
+    fakeInput.style.color = "#8e8e93";
+
+    setTimeout(() => {
+      document.body.appendChild(phone);
+      phone.style.position = "fixed";
+      phone.style.top = "50%";
+      phone.style.left = "50%";
+      phone.style.transform = "translate(-50%, -50%) scale(1)";
+      phone.style.transition = "none";
+      phone.getBoundingClientRect(); 
+
+      phone.style.animation = "phoneShake 0.3s ease";
+
+      setTimeout(() => {
+        phone.style.animation = "none";
+        phone.style.transition = "transform 0.3s ease";
+        phone.style.transform = "translate(-50%, -50%) scale(5)";
+      }, 600);
+
+      setTimeout(() => {
+        redScreen.style.display = "flex";
+        setTimeout(() => {
+          alarmSFX.pause();
+          window.location.href = "page3.html";
+        }, 4000);
+      }, 1200);
+    }, 800);
+  });
+</script>
+
+</body>
+</html>

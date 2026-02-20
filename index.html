@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Escape Your Phone</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    overflow: hidden;
+}
+
+/* ROTATE SCREEN OVERLAY */
+#overlay {
+    background: rgba(0, 0, 0, 0.85);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: -100vh; /* hide initially */
+    text-align: center;
+    color: white;
+    z-index: 9999;
+}
+
+#overlay div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#overlay svg {
+    margin-bottom: 20px;
+}
+
+/* GAME CONTAINER */
+#container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+iframe {
+    width: 960px;
+    height: 540px;
+    aspect-ratio: 16/9;
+    border: none;
+    background-color: #111;
+}
+
+/* Responsive adjustments */
+@media only screen and (min-device-width: 375px) and (orientation: portrait) {
+    #overlay {
+        top: 0;
+    }
+}
+
+@media only screen and (max-width: 767px) and (orientation: landscape) {
+    #container {
+        transform: scale(0.6);
+    }
+
+    iframe {
+        width: 100%;
+        height: auto;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ROTATE SCREEN OVERLAY -->
+<div id="overlay">
+    <div>
+        <svg fill="#ffffff" width="140" height="140" viewBox="0 0 214.367 214.367">
+            <path d="M202.403,95.22c0,46.312-33.237,85.002-77.109,93.484v25.663l-69.76-40l69.76-40v23.494
+            c27.176-7.87,47.109-32.964,47.109-62.642c0-35.962-29.258-65.22-65.22-65.22s-65.22,29.258-65.22,65.22
+            c0,9.686,2.068,19.001,6.148,27.688l-27.154,12.754c-5.968-12.707-8.994-26.313-8.994-40.441C11.964,42.716,54.68,0,107.184,0
+            S202.403,42.716,202.403,95.22z"/>
+        </svg>
+        <h1>Please rotate your phone</h1>
+    </div>
+</div>
+
+<!-- GAME -->
+<div id="container">
+    <iframe id="game" src="page1.html"></iframe>
+</div>
+
+<script>
+function checkOrientation() {
+    const overlay = document.getElementById("overlay");
+    const container = document.getElementById("container");
+
+    if (window.innerHeight > window.innerWidth) {
+        // Portrait: show overlay
+        overlay.style.top = "0";
+        container.style.display = "none";
+    } else {
+        // Landscape: hide overlay
+        overlay.style.top = "-100vh";
+        container.style.display = "flex";
+    }
+}
+// Define the audio at the top
+const introBGM = new Audio('intro.mp3');
+const clickSFX = new Audio('click.mp3');
+
+// This is the "Magic Fix"
+function startGame() {
+  // 1. The moment they click START, the browser "trusts" the site
+  introBGM.loop = true;
+  introBGM.volume = 0.5; // Optional: set volume so it's not too loud
+  
+  // 2. Play the music immediately on click
+  introBGM.play().catch(e => console.log("Audio blocked:", e));
+  
+  // 3. Play the click sound
+  clickSFX.play();
+
+  // 4. Continue your fade and redirect logic
+  const fadeOverlay = document.getElementById("fadeOverlay");
+  fadeOverlay.style.pointerEvents = "auto";
+  fadeOverlay.style.opacity = "1";
+
+  setTimeout(() => {
+    window.location.href = "page2.html";
+  }, 1000);
+}
+window.addEventListener("load", checkOrientation);
+window.addEventListener("resize", checkOrientation);
+window.addEventListener("orientationchange", checkOrientation);
+</script>
+
+</body>
+</html>

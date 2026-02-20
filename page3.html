@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Page 3 – Welcome Inside</title>
+<style>
+* { box-sizing: border-box; margin:0; padding:0; font-family: Arial, sans-serif; }
+
+body {
+  width: 960px;
+  height: 540px;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('images/background.jpg') no-repeat center center;
+  background-size: cover;
+  overflow: hidden;
+}
+
+#intro-container { width: 960px; height: 540px; position: relative; }
+
+#speech-screen {
+  position: absolute;
+  top: 30px; left: 30px; right: 30px; bottom: 30px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 25px;
+  z-index: 1;
+}
+
+#character-img {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  border-radius: 15px;
+  z-index: 2;
+}
+
+#speech-bubble {
+  position: absolute;
+  top: 330px;             
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  color: #333;
+  padding: 18px 22px;
+  border-radius: 22px;
+  width: 360px;
+  font-size: 17px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+
+#bubble-text { min-height: 60px; text-align: center; }
+
+#next-btn {
+  align-self: center;
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  background:#2d2a4a;
+  color:white;
+  opacity:0;
+  transition: 0.3s ease;
+}
+
+#next-btn.show { opacity:1; }
+
+/* THE HOVER EFFECT */
+#next-btn:hover {
+  background: #ffffff;      /* Changes background to white */
+  color: #2d2a4a;           /* Changes text to dark purple */
+  border: 2px solid #2d2a4a; /* Adds a border */
+  transform: scale(1.1);    /* Makes the button 10% larger */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Adds a nice shadow */
+}
+
+/* Optional: Add a "pressed" effect when clicked */
+#next-btn:active {
+  transform: scale(0.95);
+}
+</style>
+</head>
+
+<body>
+
+<div id="intro-container">
+  <div id="speech-screen"></div>
+  <img id="character-img" src="images/characterhappy.jpg" alt="Character">
+  <div id="speech-bubble">
+    <div id="bubble-text"></div>
+    <button id="next-btn">Next ➜</button>
+  </div>
+</div>
+
+<script>
+// --- AUDIO OBJECTS ---
+const gameBGM = new Audio('sfx/game.mp3');
+gameBGM.loop = true;
+const clickSFX = new Audio('sfx/click.mp3');
+
+const talkSounds = [
+  new Audio('sfx/talking1.mp3'), new Audio('sfx/talking2.mp3'), 
+  new Audio('sfx/talking3.mp3'), new Audio('sfx/talking4.mp3'), 
+  new Audio('sfx/talking5.mp3'), new Audio('sfx/talking6.mp3')
+];
+
+const dialogue = [
+  { text: "Oh… welcome… to the inside of your phone", img: "images/characterhappy.jpg" },
+  { text: "I'm Mr. Key,\nand I've been inside your phone watching you since the beginning.", img: "images/characterneutral.jpg" },
+  { text: "I see you’ve made a few wrong choices online…\nAnd now… well, you’re a bit stuck here.", img: "images/charactersad.jpg" },
+  { text: "Don’t worry, I can guide you through to escape.", img: "images/characterneutral.jpg" },
+  { text: "Answer the following questions right, and you'll be able to escape!", img: "images/characterhappy.jpg" },
+  { text: "Click next, and let’s start your journey!", img: "images/characterneutral.jpg" }
+];
+
+let index = 0;
+const characterImg = document.getElementById("character-img");
+const bubbleText = document.getElementById("bubble-text");
+const nextBtn = document.getElementById("next-btn");
+
+// --- INITIAL STATE ---
+// We start typing immediately, but sound will stay silent 
+// until they click the first "Next" button.
+playDialogue();
+
+function playDialogue() {
+  let text = dialogue[index].text;
+  characterImg.src = dialogue[index].img;
+  
+  let i = 0;
+  bubbleText.textContent = "";
+  nextBtn.classList.remove("show");
+
+  // Voice logic: Try to play, but don't crash if browser blocks it
+  if(talkSounds[index]) {
+    talkSounds[index].currentTime = 0;
+    talkSounds[index].play().catch(() => {
+      console.log("Voice blocked - waiting for first interaction.");
+    });
+  }
+
+  function typing() {
+    if (i <= text.length) {
+      bubbleText.textContent = text.substring(0, i);
+      i++;
+      setTimeout(typing, 25);
+    } else {
+      nextBtn.classList.add("show");
+      if(talkSounds[index]) talkSounds[index].pause();
+    }
+  }
+  typing();
+}
+
+nextBtn.addEventListener("click", () => {
+  clickSFX.play();
+  
+  // UNLOCK SOUND: The first time they click 'Next', the BGM starts!
+  if (gameBGM.paused) {
+    gameBGM.play();
+  }
+
+  if(talkSounds[index]) {
+    talkSounds[index].pause();
+  }
+  
+  index++;
+  if (index < dialogue.length) {
+    playDialogue();
+  } else {
+    window.location.href = "page4.html";
+  }
+});
+</script>
+</body>
+</html>
